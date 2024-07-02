@@ -1,20 +1,23 @@
 import 'dart:convert';
 
 class GameState {
-  const GameState(
+  GameState(
     this.playerAPosition,
     this.playerBPosition,
     this.ballX,
     this.ballY,
+    this.players,
   );
 
-  final double playerAPosition;
+  double playerAPosition;
 
-  final double playerBPosition;
+  double playerBPosition;
 
-  final double ballX;
+  double ballX;
 
-  final double ballY;
+  double ballY;
+
+  List<String> players;
 
   Map<String, dynamic> toMap() {
     return {
@@ -22,6 +25,7 @@ class GameState {
       'playerBPosition': playerBPosition,
       'ballX': ballX,
       'ballY': ballY,
+      'players': players,
     };
   }
 
@@ -31,6 +35,7 @@ class GameState {
       map['playerBPosition'] as double? ?? 0.0,
       map['ballX'] as double? ?? 0.0,
       map['ballY'] as double? ?? 0.0,
+      map['players'] as List<String>? ?? <String>[],
     );
   }
 
