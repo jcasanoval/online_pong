@@ -1,29 +1,43 @@
+import 'dart:math';
+
 import 'package:flame/game.dart' hide Route;
 import 'package:flame_audio/bgm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:online_pong/game/game.dart';
 import 'package:online_pong/gen/assets.gen.dart';
 import 'package:online_pong/l10n/l10n.dart';
 import 'package:online_pong/loading/cubit/cubit.dart';
 
 class GamePage extends StatelessWidget {
-  const GamePage({super.key});
+  const GamePage({super.key, required this.gameId});
 
-  static const routeName = '/game';
+  static const routeName = '/game/:gameId';
 
-  factory GamePage.pageBuilder(_, __) {
-    return const GamePage(
+  final String gameId;
+
+  factory GamePage.pageBuilder(_, GoRouterState routerState) {
+    final gameId = routerState.pathParameters['gameId']!;
+    return GamePage(
+      gameId: gameId,
       key: Key('game_page'),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) {
-        return AudioCubit(audioCache: context.read<PreloadCubit>().audio);
-      },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) {
+            return AudioCubit(audioCache: context.read<PreloadCubit>().audio);
+          },
+        ),
+        BlocProvider(
+          create: (context) => GameBloc(),
+        ),
+      ],
       child: const Scaffold(
         body: SafeArea(child: GameView()),
       ),

@@ -8,10 +8,12 @@ import '../models/game_state.dart';
 
 Future<Response> onRequest(RequestContext context) async {
   final redisCon = RedisConnection();
+
   final gameId = context.request.uri.queryParameters['gameId'];
   if (gameId == null) {
     return Response(statusCode: 400, body: 'gameId is required');
   }
+
   final playerId = context.request.uri.queryParameters['playerId'];
   if (playerId == null) {
     return Response(statusCode: 400, body: 'playerId is required');
@@ -20,7 +22,7 @@ Future<Response> onRequest(RequestContext context) async {
   final gameJson = await command.get('game:$gameId');
   late GameState gameState;
   if (gameJson == null) {
-    gameState = GameState(0, 0, 0, 0, [playerId]);
+    gameState = GameState(50, 50, 50, 50, [playerId]);
     await command.set('game:$gameId', gameState.toJson());
   } else {
     gameState = GameState.fromJson(gameJson as String);
@@ -37,15 +39,14 @@ Future<Response> onRequest(RequestContext context) async {
       print('connected');
 
       Timer.periodic(const Duration(seconds: 1), (_) async {
-        /// TODO: send game state
         final gameJson = await command.get('game:$gameId');
         channel.sink.add(gameJson);
       });
 
       // Listen for messages from the client.
       channel.stream.listen(
-        (event) {
-          command.multi().then((transaction) {
+        (event) async {
+          await command.multi().then((transaction) {
             /// Update game state transactionally
             // transaction.set(key, value);
             transaction.exec();

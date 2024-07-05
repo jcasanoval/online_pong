@@ -20,6 +20,7 @@ class App extends StatelessWidget {
             AudioCache(prefix: ''),
           )..loadSequentially(),
         ),
+        BlocProvider(create: (_) => UserCubit()..init()),
       ],
       child: const AppView(),
     );
