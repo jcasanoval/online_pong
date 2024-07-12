@@ -1,36 +1,27 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_guid/flutter_guid.dart';
+import 'package:game_domain/game_domain.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 part 'user_state.dart';
 
-class UserCubit extends HydratedCubit<UserState> {
-  UserCubit() : super(const UserState('', 'Anonymous'));
+class UserCubit extends HydratedCubit<Player> {
+  UserCubit() : super(const Player(id: '', username: 'Anonymous'));
 
   void init() {
     if (state.id.isEmpty) {
       final guid = Guid.generate();
-      emit(UserState(guid.value, state.username));
+      emit(Player(id: guid.value, username: state.username));
     }
   }
 
   void updateUsername(String username) {
-    emit(UserState(state.id, username));
+    emit(Player(id: state.id, username: username));
   }
 
   @override
-  UserState? fromJson(Map<String, dynamic> json) {
-    return UserState(
-      json['id'] as String,
-      json['username'] as String,
-    );
-  }
+  Player? fromJson(Map<String, dynamic> json) => Player.fromMap(json);
 
   @override
-  Map<String, dynamic>? toJson(UserState state) {
-    return {
-      'id': state.id,
-      'username': state.username,
-    };
-  }
+  Map<String, dynamic>? toJson(Player state) => state.toMap();
 }

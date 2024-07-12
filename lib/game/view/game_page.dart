@@ -1,12 +1,9 @@
-import 'dart:math';
-
 import 'package:flame/game.dart' hide Route;
-import 'package:flame_audio/bgm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:online_pong/app/cubit/user_cubit.dart';
 import 'package:online_pong/game/game.dart';
-import 'package:online_pong/gen/assets.gen.dart';
 import 'package:online_pong/l10n/l10n.dart';
 import 'package:online_pong/loading/cubit/cubit.dart';
 
@@ -35,7 +32,10 @@ class GamePage extends StatelessWidget {
           },
         ),
         BlocProvider(
-          create: (context) => GameBloc(),
+          create: (context) => GameBloc(
+            gameId,
+            context.read<UserCubit>().state.id,
+          ),
         ),
       ],
       child: const Scaffold(
@@ -45,32 +45,8 @@ class GamePage extends StatelessWidget {
   }
 }
 
-class GameView extends StatefulWidget {
-  const GameView({super.key, this.game});
-
-  final FlameGame? game;
-
-  @override
-  State<GameView> createState() => _GameViewState();
-}
-
-class _GameViewState extends State<GameView> {
-  FlameGame? _game;
-
-  late final Bgm bgm;
-
-  @override
-  void initState() {
-    super.initState();
-    bgm = context.read<AudioCubit>().bgm;
-    bgm.play(Assets.audio.background);
-  }
-
-  @override
-  void dispose() {
-    bgm.pause();
-    super.dispose();
-  }
+class GameView extends StatelessWidget {
+  const GameView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -79,30 +55,14 @@ class _GameViewState extends State<GameView> {
           fontSize: 4,
         );
 
-    _game ??= widget.game ??
-        OnlinePong(
-          l10n: context.l10n,
-          effectPlayer: context.read<AudioCubit>().effectPlayer,
-          textStyle: textStyle,
-          images: context.read<PreloadCubit>().images,
-        );
-    return Stack(
-      children: [
-        Positioned.fill(child: GameWidget(game: _game!)),
-        Align(
-          alignment: Alignment.topRight,
-          child: BlocBuilder<AudioCubit, AudioState>(
-            builder: (context, state) {
-              return IconButton(
-                icon: Icon(
-                  state.volume == 0 ? Icons.volume_off : Icons.volume_up,
-                ),
-                onPressed: () => context.read<AudioCubit>().toggleVolume(),
-              );
-            },
-          ),
-        ),
-      ],
+    final game = OnlinePong(
+      l10n: context.l10n,
+      effectPlayer: context.read<AudioCubit>().effectPlayer,
+      textStyle: textStyle,
+      images: context.read<PreloadCubit>().images,
+      gameBloc: context.read(),
     );
+
+    return GameWidget(game: game);
   }
 }

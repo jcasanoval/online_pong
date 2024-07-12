@@ -6,23 +6,33 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:online_pong/app/app.dart';
 import 'package:online_pong/l10n/l10n.dart';
 import 'package:online_pong/loading/loading.dart';
+import 'package:server_connection/server_connection.dart';
 
 class App extends StatelessWidget {
-  const App({super.key});
+  const App({required this.serverConnection, super.key});
+
+  final ServerConnection serverConnection;
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiRepositoryProvider(
       providers: [
-        BlocProvider(
-          create: (_) => PreloadCubit(
-            Images(prefix: ''),
-            AudioCache(prefix: ''),
-          )..loadSequentially(),
+        RepositoryProvider.value(
+          value: serverConnection,
         ),
-        BlocProvider(create: (_) => UserCubit()..init()),
       ],
-      child: const AppView(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (_) => PreloadCubit(
+              Images(prefix: ''),
+              AudioCache(prefix: ''),
+            )..loadSequentially(),
+          ),
+          BlocProvider(create: (_) => UserCubit()..init()),
+        ],
+        child: const AppView(),
+      ),
     );
   }
 }

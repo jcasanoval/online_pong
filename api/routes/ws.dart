@@ -18,6 +18,7 @@ Future<Response> onRequest(RequestContext context) async {
   if (playerId == null) {
     return Response(statusCode: 400, body: 'playerId is required');
   }
+
   final command = await redisCon.connect('localhost', 6379);
   final gameJson = await command.get('game:$gameId');
   late GameState gameState;
@@ -29,6 +30,7 @@ Future<Response> onRequest(RequestContext context) async {
     gameState.players.add(playerId);
     await command.set('game:$gameId', gameState.toJson());
   }
+
   if (gameState.players.length > 2) {
     return Response(statusCode: 400, body: 'Game is full');
   }

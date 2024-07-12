@@ -6,3 +6,9 @@ sealed class GameEvent extends Equatable {
   @override
   List<Object> get props => [];
 }
+
+class DragUpdate extends GameEvent {
+  const DragUpdate(this.dX);
+
+  final double dX;
+}

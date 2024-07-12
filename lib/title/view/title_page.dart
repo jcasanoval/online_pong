@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:online_pong/app/app.dart';
@@ -8,13 +11,13 @@ import 'package:online_pong/l10n/l10n.dart';
 class TitlePage extends StatelessWidget {
   const TitlePage({super.key});
 
-  static const routeName = '/title';
-
   factory TitlePage.pageBuilder(_, __) {
     return const TitlePage(
       key: Key('title_page'),
     );
   }
+
+  static const routeName = '/';
 
   @override
   Widget build(BuildContext context) {
@@ -47,14 +50,14 @@ class TitleView extends StatelessWidget {
             height: 64,
             child: ElevatedButton(
               onPressed: () {
-                context.pushReplacementNamed(
+                context.pushNamed(
                   GamePage.routeName,
                   pathParameters: {
-                    'gameId': '',
+                    'gameId': _generateRandomCode(),
                   },
                 );
               },
-              child: Center(child: Text('Create game')),
+              child: const Center(child: Text('Create game')),
             ),
           ),
           const SizedBox(height: 16),
@@ -63,7 +66,7 @@ class TitleView extends StatelessWidget {
             height: 64,
             child: ElevatedButton(
               onPressed: () => _joinGame(context),
-              child: Center(child: Text('Join game')),
+              child: const Center(child: Text('Join game')),
             ),
           ),
           const SizedBox(height: 16),
@@ -72,12 +75,23 @@ class TitleView extends StatelessWidget {
             height: 64,
             child: TextButton(
               onPressed: () => _changeUsername(context),
-              child: Center(child: Text('Change username')),
+              child: const Center(child: Text('Change username')),
             ),
           ),
         ],
       ),
     );
+  }
+
+  String _generateRandomCode() {
+    final random = Random();
+    final asciiA = 'A'.codeUnitAt(0);
+    final asciiZ = 'Z'.codeUnitAt(0);
+    final codeUnits = List.generate(4, (index) {
+      return random.nextInt(asciiZ - asciiA + 1) + asciiA;
+    });
+
+    return String.fromCharCodes(codeUnits);
   }
 
   Future<void> _joinGame(BuildContext context) async {
@@ -95,6 +109,11 @@ class TitleView extends StatelessWidget {
                 decoration: const InputDecoration(
                   labelText: 'Game ID',
                 ),
+                inputFormatters: [
+                  CapsLockFormatter(),
+                  FilteringTextInputFormatter.allow(RegExp('[A-Z]')),
+                ],
+                maxLength: 4,
               ),
             ],
           ),
@@ -112,7 +131,7 @@ class TitleView extends StatelessWidget {
       },
     );
     if (gameId != null) {
-      context.pushReplacementNamed(
+      await context.pushNamed(
         GamePage.routeName,
         pathParameters: {
           'gameId': gameId,
@@ -155,5 +174,18 @@ class TitleView extends StatelessWidget {
     if (username != null) {
       context.read<UserCubit>().updateUsername(username);
     }
+  }
+}
+
+class CapsLockFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
+    );
   }
 }

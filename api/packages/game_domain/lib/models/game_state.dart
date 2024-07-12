@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:game_domain/game_domain.dart';
+
 class GameState {
   const GameState(
     this.playerAPosition,
@@ -9,6 +11,21 @@ class GameState {
     this.players,
   );
 
+  factory GameState.fromMap(Map<String, dynamic> map) {
+    return GameState(
+      map['playerAPosition'] as double? ?? 0.0,
+      map['playerBPosition'] as double? ?? 0.0,
+      map['ballX'] as double? ?? 0.0,
+      map['ballY'] as double? ?? 0.0,
+      (map['players'] as List<Map<String, dynamic>>)
+          .map<Player>(Player.fromMap)
+          .toList(),
+    );
+  }
+
+  factory GameState.fromJson(String source) =>
+      GameState.fromMap(json.decode(source) as Map<String, dynamic>);
+
   final double playerAPosition;
 
   final double playerBPosition;
@@ -17,7 +34,7 @@ class GameState {
 
   final double ballY;
 
-  final List<String> players;
+  final List<Player> players;
 
   Map<String, dynamic> toMap() {
     return {
@@ -29,18 +46,21 @@ class GameState {
     };
   }
 
-  factory GameState.fromMap(Map<String, dynamic> map) {
-    return GameState(
-      map['playerAPosition'] as double? ?? 0.0,
-      map['playerBPosition'] as double? ?? 0.0,
-      map['ballX'] as double? ?? 0.0,
-      map['ballY'] as double? ?? 0.0,
-      map['players'] as List<String>? ?? <String>[],
-    );
-  }
-
   String toJson() => json.encode(toMap());
 
-  factory GameState.fromJson(String source) =>
-      GameState.fromMap(json.decode(source) as Map<String, dynamic>);
+  GameState copyWith({
+    double? playerAPosition,
+    double? playerBPosition,
+    double? ballX,
+    double? ballY,
+    List<Player>? players,
+  }) {
+    return GameState(
+      playerAPosition ?? this.playerAPosition,
+      playerBPosition ?? this.playerBPosition,
+      ballX ?? this.ballX,
+      ballY ?? this.ballY,
+      players ?? this.players,
+    );
+  }
 }

@@ -1,4 +1,4 @@
 /// A Very Good Project created by Very Good CLI.
 library;
 
-export 'src/game_domain.dart';
+export 'models/models.dart';
